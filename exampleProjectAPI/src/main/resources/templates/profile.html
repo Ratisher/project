@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Настройка профиля</title>
+    <link rel="stylesheet" href="/css/registration.css">
+    <link rel="shortcut icon" href="/images/logo.jpg">
+</head>
+<body>
+<div class="container">
+    <div class="reg-box">
+        <h2>Настройка профиля</h2>
+        <form id="form" action="http://localhost:8080/api/v1/web/index">
+            <div class="input-group">
+                <label for="surname">Фамилия</label>
+                <input type="text" id="surname" required>
+            </div>
+            <div class="input-group">
+                <label for="firstname">Имя</label>
+                <input type="text" id="firstname" required>
+            </div>
+            <div class="input-group">
+                <label for="patronymic">Отчество</label>
+                <input type="text" id="patronymic" required>
+            </div>
+            <div class="input-group">
+                <label for="telephone">Номер телефона</label>
+                <input type="tel" id="telephone" required>
+            </div>
+            <button type="submit">Сохранить</button>
+        </form>
+    </div>
+</div>
+<script src="/js/profile.js"></script>
+</body>
+</html>

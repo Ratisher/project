@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Франчайзи</title>
+    <link rel="stylesheet" href="/css/main.css">
+    <link rel="shortcut icon" href="/images/logo.jpg">
+</head>
+<body>
+    <header>
+        <div class="logo"></div>
+        <div class="user-dropdown">
+            <div class="user-dropdown-header">
+                <img src="/images/flag.png" alt="Флаг России" class="flag-icon">
+                <div class="user-info">
+                    <span class="user-name" id="user-name"></span>
+                    <span class="user-role" id="user-role"></span>
+                </div>
+                <img src="/images/arrow.png" alt="Стрелка" class="dropdown-icon">
+            </div>
+            <ul class="user-dropdown-menu">
+                <li class="profile">Мой профиль</li>
+                <li class="session">Мои сессии</li>
+                <a href="authorization"><li class="exit">Выход</li></a>
+            </ul>
+        </div>
+    </header>
+    <main>
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <span>Навигация</span>
+                <div class="menu-toggle">
+                    ☰
+                </div>
+            </div>
+
+            <ul class="sidebar-menu">
+                <li>
+                    <span class="icon">🔍</span>
+                    <span class="text-menu">Главная</span>
+                </li>
+                <li id="auto">
+                    <span class="icon">🖥</span>
+                    <span class="text-menu">Торговые автоматы</span>
+                </li>
+                <li class="has-submenu">
+                    <span class="icon">📄</span>
+                    <span class="text-menu">Договоры</span>
+                </li>
+                <li class="has-submenu">
+                    <span class="icon">⚙</span>
+                    <span class="text-menu">Настройки</span>
+                </li>
+            </ul>
+        </div>
+        <div class="content-section" id="content">
+
+        </div>
+    </main>
+<script src="/js/main.js"></script>
+</body>
+</html>
