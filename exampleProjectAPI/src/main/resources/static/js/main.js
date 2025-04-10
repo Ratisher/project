@@ -13,8 +13,8 @@ const fetchData = async (url) => {
     }
 };
 
-const getUser = () => fetchData(`http://localhost:8080/api/v1/user/userById/${sessionStorage.getItem('id')}`);
-const getAutomate = () => fetchData(`http://10.12.208.63:8080/VenApar/allTAPoComp/${sessionStorage.getItem('companyId')}`);
+const getUser = () => fetchData(`http://localhost:8888/api/v1/user/userById/${sessionStorage.getItem('id')}`);
+const getAutomate = () => fetchData(`http://localhost:8080/VenApar/allTAPoComp/${sessionStorage.getItem('companyId')}`);
 
 const loadUserData = async () => {
     const user = await getUser();
