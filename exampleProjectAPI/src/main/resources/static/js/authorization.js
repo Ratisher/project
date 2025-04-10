@@ -1,21 +1,18 @@
 const form = document.getElementById('form');
-const code = 123;
-async function getUser() {
+
+const fetchData = async (url) => {
     try {
-        const emailInput = document.getElementById('email');
-        const passwordInput = document.getElementById('password');
-        const response = await fetch(`http://localhost:8080/api/v1/user/authorization?email=${emailInput.value}&password=${passwordInput.value}`);
-        if (response.ok) {
-            return await response.json();
-        }
-        else {
-            return null;
-        }
+        const response = await fetch(url);
+        return (response.ok ? await response.json() : null);
     } catch (error) {
         console.error(error);
         return null;
     }
-}
+};
+
+const emailInput = document.getElementById('email');
+const passwordInput = document.getElementById('password');
+const getUser = () => fetchData(`http://localhost:8080/api/v1/user/authorization?email=${emailInput.value}&password=${passwordInput.value}`);
 
 form.onsubmit = async (e) => {
     e.preventDefault();

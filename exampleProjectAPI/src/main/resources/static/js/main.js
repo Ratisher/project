@@ -1,133 +1,167 @@
 const autoElement = document.getElementById('auto');
-let paginationCount = 10;
-async function getUser() {
-  try {
-    const response = await fetch('http://localhost:8080/api/v1/user/userById/' + sessionStorage.getItem('id'));
-    const user = await response.json();
-    return user;
-  } catch (error) {
-    console.error(error);
-    return null;
-  }
-}
+const content = document.getElementById('content');
+let paginationCount = 15;
+let activePage = 1;
 
-async function getAutomate() {
+const fetchData = async (url) => {
     try {
-        const response = await fetch('http://10.12.208.63:8080/VenApar/getAllTA');
-        const auto = await response.json();
-        return auto;
+        const response = await fetch(url);
+        return await response.json();
     } catch (error) {
         console.error(error);
         return null;
     }
-}
-
-autoElement.onclick = () => {
-    loadAuto();
 };
 
-async function loadData() {
+const getUser = () => fetchData(`http://localhost:8080/api/v1/user/userById/${sessionStorage.getItem('id')}`);
+const getAutomate = () => fetchData(`http://10.12.208.63:8080/VenApar/allTAPoComp/${sessionStorage.getItem('companyId')}`);
+
+const loadUserData = async () => {
     const user = await getUser();
-    const userName = document.getElementById('user-name');
-    const userRole = document.getElementById('user-role');
-    userName.textContent = user.familiya + ' ' + user.imya.charAt(0) + '.' + user.otchestvo.charAt(0) + '.';
-    userRole.textContent = user.idRol.nazvaniye;
+    if (!user) return;
+
+    document.getElementById('user-name').textContent =
+        `${user.familiya} ${user.imya[0]}.${user.otchestvo[0]}.`;
+    document.getElementById('user-role').textContent = user.idRol.nazvaniye;
 };
 
-async function loadAuto() {
+const renderTable = (data) => {
+    const pageCount = Math.ceil(data.length / paginationCount);
+    let startIdx = (activePage - 1) * paginationCount;
+    const endIdx = Math.min(startIdx + paginationCount, data.length);
+    const pageData = data.slice(startIdx, endIdx);
 
-    const content = document.getElementById('content');
-
-    const data = await getAutomate();
-
-    const limitedData = data.slice(0, paginationCount);
-
-    content.innerHTML =
-        `
-        <div class="table-container">
-            <div class="header-container">
-                <div class="header-text">
-                    <h2>Торговые автоматы</h2>
-                    <p class="countUp">Всего найдено ${data.length} шт.</p>
-                </div>
-            </div>
-            <div class="main-container">
-                <div class="setting-container">
-                    <div class="select-count-element">
-                        <p>Показать</p>
-                        <input type="number" value="${paginationCount}" id="count-input">
-                        <p>записей</p>
-                    </div>
-                    <input type="text" placeholder="Фильтр">
-                    <div>
-                        <button>➕ Добавить</button>
-                        <button>↪ Экспорт</button>
-                    </div>
-                </div>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Название автомата</th>
-                            <th>Модель</th>
-                            <th>Компания</th>
-                            <th>Модем</th>
-                            <th>Адрес / Место</th>
-                            <th>В работе с</th>
-                            <th>Действия</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${limitedData.map(machine => 
-                            `
-                             <tr>
-                                <td>${machine.id}</td>
-                                <td>${machine.nazvaniye}</td>
-                                <td>${machine.idModel.nazvaniye}</td>
-                                <td>${machine.idCompanya.nazvaniye}</td>
-                                <td>${machine.idModem.id}</td>
-                                <td>${machine.addres}</td>
-                                <td>${machine.dataUstanovki}</td>
-                                <td class="actions">
-                                    <span>✅</span>
-                                    <span>☐</span>
-                                    <span>✅</span>
-                                </td>
-                            </tr>
-                            `
-                        ).join('')}
-                    </tbody>   
-                </table>
-                <div class="footer-container">
-                    <p>Записи с 1 до ${paginationCount} из ${data.length} записей</p>
-                </div>
-            </div>
-        </div>
-        `
-    document.getElementById('count-input').onkeydown = (e) => {
-        if (e.code = 'Enter') {
-            paginationCount = document.getElementById('count-input').value;
-            loadAuto();
-        }
+    if (data.length == 0) {
+        startIdx = -1;
     }
+
+    content.innerHTML = `
+    <div class="table-container">
+      <div class="header-container">
+        <div class="header-text">
+            <h2>Торговые автоматы</h2>
+            <p class="countUp">Всего найдено ${data.length} шт.</p>
+        </div>
+      </div>
+      <div class="main-container">
+        <div class="setting-container">
+          <div class="select-count-element">
+            <p>Показать</p>
+            <input type="number" value="${paginationCount}" id="count-input">
+            <p>записей</p>
+          </div>
+          <input type="text" placeholder="Фильтр" id="search">
+          <div>
+            <button>➕ Добавить</button>
+            <button id="export-btn">↪ Экспорт</button>
+          </div>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Название автомата</th>
+              <th>Модель</th>
+              <th>Компания</th>
+              <th>Модем</th>
+              <th>Адрес / Место</th>
+              <th>В работе с</th>
+              <th>Действия</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${pageData.map((machine, index) => `
+              <tr ${(index + 1) % 2 != 0 ? 'style="background-color: #E3E3E3FF;"' : ''}>
+                <td>${machine.id}</td>
+                <td style="color: #04a0d4">${machine.nazvaniye}</td>
+                <td>${machine.idModel.nazvaniye}</td>
+                <td style="color: #04a0d4">${machine.idCompanya.nazvaniye}</td>
+                <td>${machine.idModem.id}</td>
+                <td>${machine.addres}</td>
+                <td>${machine.dataUstanovki}</td>
+                <td class="actions">
+                  <button>✏</button>
+                  <button>🗑</button>
+                  <button>🔓</button>
+                </td>
+              </tr>
+            `).join('')}
+          </tbody>   
+        </table>
+      </div>
+      <div class="footer-container">
+        <p>Записи с ${startIdx + 1} до ${endIdx} из ${data.length} записей</p>
+        <div class="paggination">
+          <button id="previous"><</button>
+          <span>${activePage}</span>
+          <button id="next">></button>
+        </div>
+      </div>
+    </div>
+  `;
+
+    document.getElementById('export-btn').onclick = () => exportToCSV(data);
+
+    document.getElementById('count-input').onkeyup = async (e) => {
+        if (e.code == 'Enter') {
+            paginationCount = +e.target.value;
+            activePage = 1;
+            data = await getAutomate();
+            renderTable(data);
+        }
+    };
+
+    document.getElementById('search').onchange = async (e) => {
+        const newData = [];
+        data = await getAutomate();
+        for (machine of data) {
+            if (machine.nazvaniye.indexOf(e.target.value) >= 0) {
+                newData.push(machine);
+            }
+        }
+        renderTable(newData);
+    };
+
+    document.getElementById('previous').onclick = () => {
+        if (activePage > 1) {
+            activePage--;
+            renderTable(data);
+        }
+    };
+
+    document.getElementById('next').onclick = () => {
+        if (activePage < pageCount) {
+            activePage++;
+            renderTable(data);
+        }
+    };
+};
+
+autoElement.onclick = async () => {
+    const data = await getAutomate();
+    if (data) renderTable(data);
 };
 
 document.addEventListener('DOMContentLoaded', () => {
-    const dropdown = document.querySelector('.user-dropdown');
-    const header = document.querySelector('.user-dropdown-header');
+    loadUserData();
 
-    header.addEventListener('click', () => {
-        dropdown.classList.toggle('active');
+    document.querySelector('.user-dropdown-header').addEventListener('click', () => {
+        document.querySelector('.user-dropdown').classList.toggle('active');
+    });
+
+    document.querySelector('.menu-toggle').addEventListener('click', () => {
+        document.querySelector('.sidebar').classList.toggle('collapsed');
     });
 });
 
-document.addEventListener('DOMContentLoaded', () => {
-    const menuToggle = document.querySelector('.menu-toggle');
-    const sidebar = document.querySelector('.sidebar');
+function exportToCSV(data) {
+    const csv = [
+        'ID,Название,Модель,Компания,Модем,Адрес,Дата установки',
+        ...data.map(v => `${v.id},"${v.nazvaniye}","${v.idModel.nazvaniye}","${v.idCompanya.nazvaniye}",${v.idModem.id},"${v.addres}",${v.dataUstanovki}`)
+    ].join('\n');
 
-    menuToggle.addEventListener('click', () => {
-        sidebar.classList.toggle('collapsed');
-    });
-});
-
-document.addEventListener('DOMContentLoaded', loadData());
+    const link = document.createElement('a');
+    link.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
+    link.download = 'automates.csv';
+    link.click();
+}
