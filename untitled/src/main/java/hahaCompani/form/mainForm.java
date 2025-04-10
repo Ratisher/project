@@ -69,18 +69,27 @@ public class mainForm extends JFrame {
     private JButton экпортButton;
     private JTable table1;
     private JPanel taInfo;
-    private JButton a1Button;
     private JButton редактироватьButton;
     private JButton удалитьButton;
-    private JButton применитьButton;
-
+    private JButton поискButton;
+    private JPanel pagination;
+    private JScrollPane pPanelScroll;
+    private JScrollPane tPanelScrol;
+    private JPanel containerPanel;
+    private JLabel colvo;
+    private JButton отозватьМодемButton;
+    private JPanel ableToolBar;
+    private JScrollPane panelPanel;
 
     public DefaultCategoryDataset data;
     public OkHttpClient ok = new OkHttpClient();
+    public int lengthTA;
+    public int usePlitka = 0;
+    public static JSONObject TA = null;
 
     public mainForm() {
         setContentPane(mainPanel);
-        setSize(1920, 1080);
+        setSize(1900, 880);
         setTitle("Личный Кабинет");
         setLocationRelativeTo(null);
 
@@ -165,10 +174,150 @@ public class mainForm extends JFrame {
                 taPanel.setVisible(!taPanel.isVisible());
             }
         });
+        comboBox1.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                int c = Integer.parseInt((String) comboBox1.getSelectedItem());
+                createPagination(c);
+                createTAPanelSpec(0, c);
+            }
+        });
+        тблButton.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                usePlitka = 0;
+                System.out.println(usePlitka);
+                createTAPanelP();
+                pPanelScroll.setVisible(true);
+                tPanelScrol.setVisible(false);
+                ableToolBar.setVisible(false);
+                taInfo.revalidate();
+                taInfo.repaint();
+            }
+        });
+        плButton.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                usePlitka = 1;
+                System.out.println(usePlitka);
+                createTAPanel();
+                pPanelScroll.setVisible(false);
+                tPanelScrol.setVisible(true);
+                ableToolBar.setVisible(true);
+                taInfo.revalidate();
+                taInfo.repaint();
+            }
+        });
+        createTAPanelP();
+        поискButton.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                createTAPanelFiltr();
+            }
+        });
     }
 
+    //ТА отображение
 
-//ТА отображение
+    public void createTAPanelP() {
+        // 1. Создаем контейнер с GridLayout (8 колонок)
+        containerPanel = new JPanel(new GridLayout(0, 9, 5, 5)); // rows, cols, hgap, vgap
+
+        // 2. Устанавливаем контейнер в JScrollPane
+        pPanelScroll.setViewportView(containerPanel);
+
+        // 3. Добавляем заголовки (первая строка)
+        String[] headers = {"ID", "Название", "Модель", "Компания", "Модем", "Адрес", "Дата установки", "Статус", "Действия"};
+        for (String header : headers) {
+            JLabel headerLabel = new JLabel(header, SwingConstants.CENTER);
+            headerLabel.setFont(headerLabel.getFont().deriveFont(Font.BOLD));
+            headerLabel.setBorder(BorderFactory.createLineBorder(Color.GRAY));
+            headerLabel.setOpaque(true);
+            headerLabel.setBackground(new Color(220, 230, 240));
+            containerPanel.add(headerLabel);
+        }
+
+        // 4. Загружаем данные и добавляем записи
+        Request req = new Request.Builder().url("http://localhost:8080/VenApar/getAllTA").get().build();
+
+        try (Response response = ok.newCall(req).execute()) {
+            JSONArray ja = new JSONArray(response.body().string());
+
+            for (int i = 0; i < ja.length(); i++) {
+                JSONObject jo = ja.getJSONObject(i);
+
+                // Добавляем данные (каждая запись — 8 ячеек подряд)
+                containerPanel.add(createDataCell(String.valueOf(jo.getInt("id"))));
+                containerPanel.add(createDataCell(jo.getString("nazvaniye")));
+                containerPanel.add(createDataCell(jo.getJSONObject("idModel").getString("nazvaniye")));
+                containerPanel.add(createDataCell(jo.getJSONObject("idCompanya").getString("nazvaniye")));
+                containerPanel.add(createDataCell(String.valueOf(jo.getJSONObject("idModem").getInt("id"))));
+                containerPanel.add(createDataCell(jo.getString("addres")));
+                containerPanel.add(createDataCell(jo.getString("dataUstanovki")));
+                containerPanel.add(createDataCell(jo.optString("status", "Активен"))); // Пример дополнительного поля
+
+                JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+                buttonPanel.setBorder(BorderFactory.createLineBorder(Color.LIGHT_GRAY));
+                buttonPanel.setOpaque(true);
+                buttonPanel.setBackground(Color.WHITE);
+
+                JButton create = new JButton("🖊");
+
+                create.addMouseListener(new MouseAdapter() {
+                    @Override
+                    public void mouseClicked(MouseEvent e) {
+                        TA = jo;
+                        TAredactor tar = new TAredactor();
+                        tar.setVisible(true);
+                    }
+                });
+
+                JButton delette = new JButton("🧨");
+
+                delette.addMouseListener(new MouseAdapter() {
+                    @Override
+                    public void mouseClicked(MouseEvent e) {
+                        TA = jo;
+                        TAredactor tar = new TAredactor();
+                        tar.setVisible(true);
+                    }
+                });
+
+                JButton modem = new JButton("🎞");
+
+                modem.addMouseListener(new MouseAdapter() {
+                    @Override
+                    public void mouseClicked(MouseEvent e) {
+                        TA = jo;
+                        minusModem();
+                    }
+                });
+
+                buttonPanel.add(create);
+                buttonPanel.add(delette);
+                buttonPanel.add(modem);
+                containerPanel.add(buttonPanel);
+
+                colvo.setText("Количество записей: " + i);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        containerPanel.revalidate();
+        containerPanel.repaint();
+    }
+
+    public JLabel createDataCell(String text) {
+        // Добавляем HTML-теги для переноса
+        String htmlText = "<html><div style='width:100px;'>" + text + "</div></html>";
+        JLabel label = new JLabel(htmlText);
+        label.setBorder(BorderFactory.createLineBorder(Color.LIGHT_GRAY));
+        label.setOpaque(true);
+        label.setBackground(Color.WHITE);
+        return label;
+    }
+
     public void createTAPanel() {
 
         String[] columns = {"ID", "Название автомата", "Модель", "Компания", "Модем", "Адрес / Место", "В работе с"};
@@ -181,7 +330,7 @@ public class mainForm extends JFrame {
         try (Response response = ok.newCall(req).execute()) {
 
             JSONArray ja = new JSONArray(response.body().string());
-
+            lengthTA = ja.length();
             for (int i = 0; i < ja.length(); i++) {
                 JSONObject jo = ja.getJSONObject(i);
                 Object[] rowData = {jo.getInt("id"), jo.getString("nazvaniye"), jo.getJSONObject("idModel").getString("nazvaniye"),
@@ -189,6 +338,7 @@ public class mainForm extends JFrame {
                         jo.getJSONObject("idModem").getInt("id"),
                         jo.getString("addres"), jo.getString("dataUstanovki")};
                 model.addRow(rowData);
+                colvo.setText("Количество записей: " + i);
             }
 
         } catch (IOException e) {
@@ -210,6 +360,163 @@ public class mainForm extends JFrame {
             }
         });
     }
+
+    public void createTAPanelFiltr() {
+
+        String[] columns = {"ID", "Название автомата", "Модель", "Компания", "Модем", "Адрес / Место", "В работе с"};
+        DefaultTableModel model = new DefaultTableModel(columns, 0);
+
+        table1.setModel(model);
+
+        Request req = new Request.Builder().url("http://localhost:8080/VenApar/getAllTA").get().build();
+
+        try (Response response = ok.newCall(req).execute()) {
+
+            JSONArray ja = new JSONArray(response.body().string());
+            lengthTA = ja.length();
+            for (int i = 0; i < ja.length(); i++) {
+                JSONObject jo = ja.getJSONObject(i);
+                if (jo.getString("nazvaniye").contains(фильтрTextField.getText())) {
+                    Object[] rowData = {jo.getInt("id"), jo.getString("nazvaniye"), jo.getJSONObject("idModel").getString("nazvaniye"),
+                            jo.getJSONObject("idCompanya").getString("nazvaniye"),
+                            jo.getJSONObject("idModem").getInt("id"),
+                            jo.getString("addres"), jo.getString("dataUstanovki")};
+                    model.addRow(rowData);
+                }
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        // Где-то после инициализации таблицы
+        table1.setDefaultRenderer(Object.class, new DefaultTableCellRenderer() {
+            @Override
+            public Component getTableCellRendererComponent(JTable table, Object value,
+                                                           boolean isSelected, boolean hasFocus, int row, int column) {
+                Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+
+                if (!isSelected) {
+                    c.setBackground(row % 2 != 0 ? new Color(230, 230, 250) : Color.WHITE);
+                }
+
+                return c;
+            }
+        });
+    }
+
+    public void createTAPanelSpec(int otSkolko, int poSkolko) {
+        String[] columns = {"ID", "Название автомата", "Модель", "Компания", "Модем", "Адрес / Место", "В работе с"};
+        DefaultTableModel model = new DefaultTableModel(columns, 0);
+
+        table1.setModel(model);
+
+        Request req = new Request.Builder().url("http://localhost:8080/VenApar/getAllTA").get().build();
+
+        try (Response response = ok.newCall(req).execute()) {
+
+            JSONArray ja = new JSONArray(response.body().string());
+            int i = 0;
+            for (; otSkolko < ja.length(); otSkolko++) {
+                i += 1;
+                JSONObject jo = ja.getJSONObject(otSkolko);
+                Object[] rowData = {jo.getInt("id"), jo.getString("nazvaniye"), jo.getJSONObject("idModel").getString("nazvaniye"),
+                        jo.getJSONObject("idCompanya").getString("nazvaniye"),
+                        jo.getJSONObject("idModem").getInt("id"),
+                        jo.getString("addres"), jo.getString("dataUstanovki")};
+                model.addRow(rowData);
+                colvo.setText("Количество записей: " + i);
+                if (poSkolko-1 == otSkolko) {
+                    break;
+                }
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        // Где-то после инициализации таблицы
+        table1.setDefaultRenderer(Object.class, new DefaultTableCellRenderer() {
+            @Override
+            public Component getTableCellRendererComponent(JTable table, Object value,
+                                                           boolean isSelected, boolean hasFocus, int row, int column) {
+                Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+
+                if (!isSelected) {
+                    c.setBackground(row % 2 != 0 ? new Color(230, 230, 250) : Color.WHITE);
+                }
+
+                return c;
+            }
+        });
+    }
+
+    public void createPagination(int countZap) {
+
+        // Очищаем существующую пагинацию (если нужно)
+        pagination.removeAll();
+        pagination.setLayout(new FlowLayout());
+
+        // Вычисляем количество страниц
+        int pageCount = (int) Math.ceil((double) lengthTA / countZap);
+
+        // Создаем кнопки для каждой страницы
+        for (int i = 0; i < pageCount; i++) {
+            final int pageNumber = i;
+            JButton pageButton = new JButton(String.valueOf(i + 1));
+
+            // Вычисляем диапазон записей для этой страницы
+            int otSkolko = pageNumber * countZap;
+            int poSkolko = Math.min((pageNumber + 1) * countZap, lengthTA);
+
+            // Устанавливаем обработчик нажатия
+            pageButton.addMouseListener(new MouseAdapter() {
+                @Override
+                public void mouseClicked(MouseEvent e) {
+                    createTAPanelSpec(otSkolko, poSkolko);
+                }
+            });
+
+            // Добавляем кнопку в пагинацию
+            pagination.add(pageButton, BorderLayout.EAST);
+            pagination.revalidate();
+            pagination.repaint();
+        }
+    }
+
+    //==
+
+
+
+    // ТА редактирование
+
+    public void minusModem() {
+        // Создаем диалоговое окно подтверждения
+        int response = JOptionPane.showConfirmDialog(
+                null,
+                "Вы уверены, что хотите выполнить это действие?",
+                "Подтверждение",
+                JOptionPane.YES_NO_OPTION,
+                JOptionPane.QUESTION_MESSAGE
+        );
+
+        // Если пользователь не выбрал "Да", прерываем выполнение
+        if (response != JOptionPane.YES_OPTION) {
+            return;
+        }
+
+        // Продолжаем выполнение оригинального кода
+        Request req = new Request.Builder()
+                .url("http://localhost:8080/VenApar/minusModem" + "?id=" + TA.getInt("id"))
+                .build();
+
+        try (Response res = ok.newCall(req).execute()) {
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    //==
 
     public void createUserButton() {
 
