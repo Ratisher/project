@@ -13,7 +13,7 @@ public class Obslushivaniye {
     @Column(name = "idObslushovaniye", nullable = false)
     private Integer id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @OnDelete(action = OnDeleteAction.CASCADE)
     @JoinColumn(name = "idAvtomat")
     private Vendingovieavtomati idAvtomat;
@@ -27,7 +27,7 @@ public class Obslushivaniye {
     @Column(name = "problemi")
     private String problemi;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @OnDelete(action = OnDeleteAction.CASCADE)
     @JoinColumn(name = "idPolzovatel")
     private Polzovateli idPolzovatel;

@@ -12,25 +12,17 @@ const fetchData = async (url) => {
 
 const emailInput = document.getElementById('email');
 const passwordInput = document.getElementById('password');
-const getUser = () => fetchData(`http://localhost:8888/api/v1/user/authorization?email=${emailInput.value}&password=${passwordInput.value}`);
-const getCompany = (fCode) => fetchData("http://localhost:8888/api/v1/company/getById/" + fCode);
+const getUser = () => fetchData(`http://localhost:8080/api/v1/user/authorization?email=${emailInput.value}&password=${passwordInput.value}`);
 
 form.onsubmit = async (e) => {
     e.preventDefault();
     const codeInput = document.getElementById('code');
-    if (!form.checkValidity()) {
-        form.reportValidity();
-        return;
+    const user = await getUser();
+    if (user == null || codeInput.value != code) {
+        alert('Введены неверные данные!');
     }
     else {
-        const user = await getUser();
-        const code = await getCompany(document.getElementById('code').value);
-        if (user == null || code == null) {
-            alert('Введены неверные данные!');
-        } else {
-            sessionStorage.setItem('id', user.id);
-            sessionStorage.setItem('companyId', code);
-            form.submit();
-        }
+        sessionStorage.setItem('id', user.id);
+        form.submit();
     }
 };

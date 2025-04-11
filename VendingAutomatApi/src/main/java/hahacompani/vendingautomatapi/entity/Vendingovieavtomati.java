@@ -1,6 +1,5 @@
 package hahacompani.vendingautomatapi.entity;
 
-import com.fasterxml.jackson.annotation.JsonGetter;
 import jakarta.persistence.*;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.OnDelete;
@@ -11,22 +10,21 @@ import java.time.LocalDate;
 @Entity
 @Table(name = "vendingovieavtomati")
 public class Vendingovieavtomati {
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
     @Column(name = "idAvtomat", nullable = false)
     private Integer id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @OnDelete(action = OnDeleteAction.CASCADE)
     @JoinColumn(name = "idModel")
     private Modeli idModel;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @OnDelete(action = OnDeleteAction.CASCADE)
     @JoinColumn(name = "idMarka")
     private Marki idMarka;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @OnDelete(action = OnDeleteAction.CASCADE)
     @JoinColumn(name = "idStatus")
     private Statusi idStatus;
@@ -34,7 +32,7 @@ public class Vendingovieavtomati {
     @Column(name = "addres")
     private String addres;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @OnDelete(action = OnDeleteAction.CASCADE)
     @JoinColumn(name = "idMestoUstanovki")
     private Mestaustanovki idMestoUstanovki;
@@ -48,7 +46,7 @@ public class Vendingovieavtomati {
     @Column(name = "dataPoslednegoObslushivaniya")
     private LocalDate dataPoslednegoObslushivaniya;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @OnDelete(action = OnDeleteAction.CASCADE)
     @JoinColumn(name = "idReshimRaboti")
     private Reshimiraboti idReshimRaboti;
@@ -62,22 +60,22 @@ public class Vendingovieavtomati {
     @Column(name = "vremyaRaboti", length = 30)
     private String vremyaRaboti;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @OnDelete(action = OnDeleteAction.CASCADE)
     @JoinColumn(name = "idChasovoyPoyas")
     private Chasoviepiyasa idChasovoyPoyas;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @OnDelete(action = OnDeleteAction.CASCADE)
     @JoinColumn(name = "idTovarnayaMatrica")
     private Tovarniimatrici idTovarnayaMatrica;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @OnDelete(action = OnDeleteAction.CASCADE)
     @JoinColumn(name = "idCritichescoeZnacheniye")
     private Shablonicritticeskihznacheniy idCritichescoeZnacheniye;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @OnDelete(action = OnDeleteAction.CASCADE)
     @JoinColumn(name = "idShablonYvedomleniy")
     private Shabloniuvedomliniy idShablonYvedomleniy;
@@ -117,12 +115,12 @@ public class Vendingovieavtomati {
     @Column(name = "prioritetObslushivaniya", length = 100)
     private String prioritetObslushivaniya;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @OnDelete(action = OnDeleteAction.CASCADE)
     @JoinColumn(name = "idModem")
     private Modemi idModem;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @OnDelete(action = OnDeleteAction.CASCADE)
     @JoinColumn(name = "idCompanya")
     private Companii idCompanya;

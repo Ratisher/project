@@ -1,6 +1,5 @@
 package hahacompani.vendingautomatapi.entity;
 
-import com.fasterxml.jackson.annotation.JsonGetter;
 import jakarta.persistence.*;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
@@ -27,15 +26,10 @@ public class Polzovateli {
     @Column(name = "telephon", length = 15)
     private String telephon;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @OnDelete(action = OnDeleteAction.CASCADE)
     @JoinColumn(name = "idRol")
     private Roli idRol;
-
-    @JsonGetter("roleName")
-    public String getNameRol(){
-        return idRol.getNazvaniye();
-    }
 
     @Column(name = "parol", length = 100)
     private String parol;

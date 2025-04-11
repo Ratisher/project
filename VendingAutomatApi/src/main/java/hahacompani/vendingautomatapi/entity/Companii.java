@@ -11,7 +11,7 @@ public class Companii {
     @Column(name = "idCompanya", nullable = false)
     private Integer id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @OnDelete(action = OnDeleteAction.CASCADE)
     @JoinColumn(name = "idVishayaCompaniya")
     private Vishayacompanii idVishayaCompaniya;
